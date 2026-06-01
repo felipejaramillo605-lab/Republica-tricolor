@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Republica Tricolor</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>República Tricolor — Simulador de Gobierno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fc; --panel: #ffffff; --panel2: #f1f3f8; --border: #dce0e8;
+      --gold: #f4b81a; --gold2: #f7d44a; --gold-dim: #b8960c;
+      --blue: #003893; --red: #ce1126; --yellow: #f4b81a;
+      --white: #1a1f36; --muted: #5a6070; --light-text: #8b92a5;
+      --tag-r: #ce1126; --tag-cd: #003893; --tag-c: #e67e22; --tag-l: #2e7d32; --tag-h: #7b1fa2;
+      --accent-success: #2e7d32; --accent-danger: #c62828; --accent-warning: #e67e22;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Barlow', sans-serif; background: var(--bg);
+      color: var(--white); min-height: 100vh;
+      background-image: linear-gradient(135deg, #f4f7fc 0%, #e9ecf5 100%);
+    }
+    #header { text-align:center; padding:24px 16px 12px; border-bottom:3px solid var(--gold); background:white; box-shadow:0 4px 12px rgba(0,0,0,0.03); }
+    #header h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,6vw,4rem); letter-spacing:4px; color:var(--blue); text-shadow:2px 2px 0 rgba(244,184,26,0.3); line-height:1; }
+    .hdr-sub { font-family:'Barlow Condensed',sans-serif; font-size:.8rem; letter-spacing:3px; color:var(--red); text-transform:uppercase; margin-top:3px; font-weight:600; }
+    #year-banner { display:inline-block; margin-top:9px; background:var(--gold); color:#0a0f24; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:3px; padding:4px 24px; border-radius:20px; box-shadow:0 2px 8px rgba(244,184,26,0.25); }
+    #game { width:100%; max-width:1100px; margin:0 auto; padding:18px 12px 50px; display:none; flex-direction:column; gap:16px; }
+    .overlay-screen { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .overlay-card { background:white; border-radius:20px; max-width:750px; width:100%; padding:36px 28px; text-align:center; max-height:92vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.2); color:#1a1f36; }
+    .overlay-card h2 { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:3px; color:var(--blue); margin-bottom:16px; }
+    .overlay-card::-webkit-scrollbar { width: 8px; } .overlay-card::-webkit-scrollbar-track { background: #f1f3f8; border-radius: 4px; } .overlay-card::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+    .diff-btn { display:block; width:100%; padding:14px; margin-bottom:10px; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:2px; background:white; color:var(--blue); border:2px solid var(--blue); border-radius:12px; cursor:pointer; transition:all .3s; }
+    .diff-btn:hover { background:var(--blue); color:white; transform:translateY(-2px); }
+    .diff-desc { font-size:.78rem; font-family:'Barlow Condensed',sans-serif; color:var(--muted); display:block; margin-top:5px; text-transform:none; font-weight:400; }
+    .help-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; margin-top:15px; background:white; border:1px solid var(--border); border-radius:20px; cursor:pointer; font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--muted); transition:all .2s; }
+    .help-btn:hover { background:var(--panel2); border-color:var(--gold); }
+    #stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    @media(max-width:800px) { #stats-grid { grid-template-columns:repeat(2,1fr); } }
+    .stat-card { background:white; border-radius:12px; padding:14px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--border); position:relative; }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:var(--ac,var(--blue)); border-radius:12px 12px 0 0; }
+    .stat-label { font-family:'Barlow Condensed',sans-serif; font-size:.68rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; font-weight:600; }
+    .stat-value { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; color:var(--blue); }
+    .stat-value.negative { color:#c62828; }
+    .stat-bar-bg { margin-top:6px; height:6px; background:#e9ecf5; border-radius:3px; overflow:hidden; }
+    .stat-bar-fill { height:100%; border-radius:3px; transition:width .7s ease,background .4s; }
+    .stat-delta { position:absolute; top:10px; right:10px; font-family:'Barlow Condensed',sans-serif; font-size:.75rem; font-weight:700; opacity:0; transition:opacity .3s; }
+    .stat-delta.show { opacity:1; }
+    .debt-warning { background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:12px 16px; margin-top:8px; font-family:'Barlow Condensed',sans-serif; font-weight:600; color:#856404; display:none; }
+    .debt-warning.show { display:block; animation:fadeUp .4s ease; }
+    #event-box { background:white; border-left:5px solid var(--gold); border-radius:8px; padding:14px 16px; font-family:'Barlow Condensed',sans-serif; font-size:.95rem; font-weight:600; color:#1a1f36; display:flex; flex-direction:column; gap:10px; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+    .ev-item { display:flex; align-items:flex-start; gap:10px; background:#f8f9fc; padding:10px 12px; border-radius:6px; flex-direction:column; }
+    .ev-item .ev-header { display:flex; align-items:center; gap:8px; width:100%; }
+    .ev-item .ev-detail { font-size:.75rem; color:var(--muted); margin-top:4px; padding-left:28px; font-weight:400; }
+    .ev-item.ev-conditional { border-left:4px solid var(--accent-warning); background:#fffdf5; }
+    .ev-item.ev-avoided { border-left:4px solid var(--accent-success); background:#f5fff5; }
+    .ev-item.ev-critical { border-left:4px solid #c62828; background:#fff5f5; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;} }
+    .section-title { font-family:'Bebas Neue',sans-serif; font-size:1.05rem; letter-spacing:3px; color:var(--blue); margin-bottom:-2px; display:flex; align-items:center; gap:8px; }
+    .section-title::after { content:''; flex:1; height:2px; background:var(--gold); border-radius:2px; }
+    .decision-group { background:white; border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+    .decision-header { display:flex; align-items:center; gap:10px; padding:14px 18px; background:#fafbfd; cursor:pointer; user-select:none; transition:background .2s; border-bottom:1px solid var(--border); }
+    .decision-header:hover { background:#f1f3f8; }
+    .dh-icon { font-size:1.3rem; }
+    .dh-title { font-family:'Bebas Neue',sans-serif; font-size:1.05rem; letter-spacing:2px; color:var(--blue); }
+    .dh-sel { margin-left:auto; font-family:'Barlow Condensed',sans-serif; font-size:.8rem; color:var(--accent-success); font-weight:700; opacity:0; }
+    .dh-sel.show { opacity:1; }
+    .dh-arrow { margin-left:6px; color:var(--muted); transition:transform .3s; }
+    .decision-header.open .dh-arrow { transform:rotate(180deg); }
+    .cards-wrap { display:none; padding:14px; gap:12px; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+    .choice-card { background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; position:relative; }
+    .choice-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--ac2,var(--border)); border-radius:12px 12px 0 0; }
+    .choice-card:hover { border-color:var(--gold); background:white; transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.06); }
+    .choice-card.selected { border-color:var(--blue); background:rgba(0,56,147,0.05); box-shadow:0 0 0 2px var(--blue); }
+    .card-tag { font-family:'Barlow Condensed',sans-serif; font-size:.6rem; letter-spacing:2.5px; text-transform:uppercase; padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:8px; font-weight:700; }
+    .tag-R { background:rgba(206,17,38,0.12); color:var(--tag-r); }
+    .tag-CD { background:rgba(0,56,147,0.1); color:var(--tag-cd); }
+    .tag-C { background:rgba(230,126,34,0.12); color:var(--tag-c); }
+    .tag-L { background:rgba(46,125,50,0.12); color:var(--tag-l); }
+    .tag-H { background:rgba(123,31,162,0.12); color:var(--tag-h); }
+    .card-name { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; color:#1a1f36; display:block; margin-bottom:4px; line-height:1.2; }
+    .card-who { font-family:'Barlow Condensed',sans-serif; font-size:.7rem; color:var(--gold-dim); letter-spacing:1px; display:block; margin-bottom:6px; }
+    .card-desc { font-size:.78rem; color:var(--muted); line-height:1.5; margin-bottom:8px; }
+    .deep-look-toggle { display:flex; align-items:center; gap:6px; margin-top:8px; padding:6px 0; color:var(--blue); font-weight:600; font-size:.75rem; cursor:pointer; border-top:1px dashed var(--border); }
+    .deep-look-content { display:none; margin-top:8px; font-size:.72rem; font-style:italic; color:#4a5568; line-height:1.6; background:#f8f9fc; padding:10px; border-radius:6px; border-left:3px solid var(--gold); }
+    .deep-look-content cite { color:var(--blue); font-style:normal; font-weight:700; display:block; margin-top:6px; }
+    .card-effects { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+    .eff { font-family:'Barlow Condensed',sans-serif; font-size:.68rem; font-weight:700; padding:3px 8px; border-radius:4px; }
+    .eff.pos { background:rgba(46,125,50,0.12); color:#2e7d32; }
+    .eff.neg { background:rgba(198,40,40,0.12); color:#c62828; }
+    #next-btn { width:100%; padding:16px; font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:4px; background:linear-gradient(135deg,#f4b81a,#003893,#ce1126); color:white; border:none; border-radius:12px; cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(0,0,0,0.1); }
+    #next-btn:hover:not(:disabled) { transform:translateY(-3px); box-shadow:0 8px 28px rgba(244,184,26,0.4); }
+    #next-btn:disabled { opacity:.4; cursor:not-allowed; }
+    #progress-bar { height:6px; background:#dce0e8; border-radius:3px; overflow:hidden; }
+    #progress-fill { height:100%; background:linear-gradient(90deg,#f4b81a,#003893,#ce1126); transition:width .7s ease; border-radius:3px; }
+    .fin-emoji { font-size:4rem; margin-bottom:10px; }
+    .govt-badge { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 22px; border-radius:30px; display:inline-block; margin-bottom:14px; }
+    .fin-text { font-size:.9rem; color:var(--muted); line-height:1.7; margin-bottom:14px; }
+    .fin-reflection { font-size:.84rem; font-style:italic; color:#4a5568; line-height:1.6; margin-bottom:18px; padding:14px; background:#f8f9fc; border-radius:8px; border-left:4px solid var(--gold); text-align:left; }
+    .fin-reflection cite { color:var(--blue); font-style:normal; font-weight:700; display:block; margin-top:6px; }
+    #final-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px; }
+    .fs-item { background:#f1f3f8; border-radius:8px; padding:10px 4px; }
+    .fs-val { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--blue); }
+    .fs-lbl { font-size:.6rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+    .source-links { margin-top:20px; padding:12px; background:#f1f3f8; border-radius:8px; text-align:left; font-size:.8rem; }
+    .source-links a { color:var(--blue); text-decoration:underline; }
+    .recap-year { background:white; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; text-align:left; }
+    .recap-year h4 { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--blue); margin-bottom:12px; letter-spacing:2px; }
+    .recap-decision { background:#f8f9fc; padding:12px; border-radius:8px; margin-bottom:10px; border-left:3px solid var(--gold); }
+    .recap-decision strong { color:var(--blue); display:block; margin-bottom:4px; }
+    .recap-theory { font-size:.78rem; font-style:italic; color:#4a5568; margin-top:6px; line-height:1.5; }
+    .recap-theory cite { color:var(--blue); font-style:normal; font-weight:600; display:block; margin-top:4px; }
+    @media(max-width:480px) { .cards-wrap { grid-template-columns:1fr; } #final-stats { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+
+<!-- DIFFICULTY SCREEN -->
+<div id="diff-screen" class="overlay-screen">
+  <div class="overlay-card">
+    <h2>🇨🇴 REPÚBLICA TRICOLOR</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px;line-height:1.6">
+      Simulador de Gobierno · Colombia · 5 Años<br>
+      Cada decisión tiene consecuencias reales.<br>Elige tu nivel de dificultad.
+    </p>
+    <button class="diff-btn" onclick="startGame('facil')">🟢 FÁCIL<span class="diff-desc">2 eventos/año · Costos estándar</span></button>
+    <button class="diff-btn" onclick="startGame('normal')">🟡 NORMAL<span class="diff-desc">3 eventos/año · +20% costo fiscal · Condicionales activos</span></button>
+    <button class="diff-btn" onclick="startGame('dificil')">🔴 DIFÍCIL<span class="diff-desc">4 eventos/año · +50% costo · Condicionales severos</span></button>
+    <button class="help-btn" onclick="toggleHelp()">📖 CÓMO JUGAR</button>
+    <div id="help-panel" style="display:none;text-align:left;margin-top:16px;font-size:.85rem;line-height:1.7;background:#f8f9fc;padding:16px;border-radius:10px;">
+      <h4 style="color:var(--blue);">🎯 Objetivo</h4><p>Gobiernas Colombia 5 años. Cada año tomas <strong>5 decisiones</strong> en áreas clave.</p>
+      <h4 style="color:var(--blue);margin-top:12px;">📊 Indicadores (8)</h4>
+      <ul style="padding-left:18px;"><li><strong>💰 Dinero del Estado:</strong> Si cae bajo 0, deuda de emergencia.</li><li><strong>🕊️ Corrupción:</strong> A menor número, más corrupto.</li><li><strong>🏥 Salud:</strong> Cobertura y calidad.</li><li><strong>🔫 Homicidios:</strong> Violencia. Si llega a 90+, desploma el IDH.</li><li><strong>📉 Desempleo:</strong> Si llega a 90+, dispara delincuencia.</li><li><strong>📈 IDH:</strong> Desarrollo Humano.</li><li><strong>🌐 Rel. Exteriores:</strong> Alineación geopolítica.</li><li><strong>⚖️ Estabilidad:</strong> Fortaleza democrática.</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div id="header"><h1>🇨🇴 República Tricolor</h1><div class="hdr-sub">Simulador de Gobierno · Colombia · 5 Años</div><div id="year-banner">AÑO 1 DE 5</div></div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+  <div id="debt-warning" class="debt-warning">⚠️ DEUDA EXTERNA DE EMERGENCIA: El Estado quedó en números rojos. Préstamo de $250 pero todos los indicadores sociales caen 40%.</div>
+  <div id="stats-grid">
+    <div class="stat-card" style="--ac:#f4b81a"><div class="stat-label">💰 Dinero del Estado</div><div class="stat-value" id="val-money">400</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-money" style="width:40%;background:#f4b81a"></div></div><div class="stat-delta" id="delta-money"></div></div>
+    <div class="stat-card" style="--ac:#ce1126"><div class="stat-label">🕊️ Percepción Corrupción</div><div class="stat-value" id="val-corruption">55</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-corruption" style="width:55%;background:#ce1126"></div></div><div class="stat-delta" id="delta-corruption"></div></div>
+    <div class="stat-card" style="--ac:#2e7d32"><div class="stat-label">🏥 Salud y Bienestar</div><div class="stat-value" id="val-health">62</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-health" style="width:62%;background:#2e7d32"></div></div><div class="stat-delta" id="delta-health"></div></div>
+    <div class="stat-card" style="--ac:#c62828"><div class="stat-label">🔫 Tasa Homicidios</div><div class="stat-value" id="val-homicide">48</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-homicide" style="width:48%;background:#c62828"></div></div><div class="stat-delta" id="delta-homicide"></div></div>
+    <div class="stat-card" style="--ac:#e67e22"><div class="stat-label">📉 Desempleo/Informalidad</div><div class="stat-value" id="val-unemployment">58</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-unemployment" style="width:58%;background:#e67e22"></div></div><div class="stat-delta" id="delta-unemployment"></div></div>
+    <div class="stat-card" style="--ac:#003893"><div class="stat-label">📈 IDH (Desarrollo Humano)</div><div class="stat-value" id="val-hdi">60</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-hdi" style="width:60%;background:#003893"></div></div><div class="stat-delta" id="delta-hdi"></div></div>
+    <div class="stat-card" style="--ac:#7b1fa2"><div class="stat-label">🌐 Relaciones Exteriores</div><div class="stat-value" id="val-foreign">50</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-foreign" style="width:50%;background:#7b1fa2"></div></div><div class="stat-delta" id="delta-foreign"></div></div>
+    <div class="stat-card" style="--ac:#8e44ad"><div class="stat-label">⚖️ Estabilidad Institucional</div><div class="stat-value" id="val-stability">65</div><div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-stability" style="width:65%;background:#8e44ad"></div></div><div class="stat-delta" id="delta-stability"></div></div>
+  </div>
+  <div id="event-box"></div>
+  <div class="section-title"><span>💰</span> ECONOMÍA Y FISCAL</div>
+  <div class="decision-group" id="grp-eco"><div class="decision-header" onclick="toggleGroup('eco')"><span class="dh-icon">💼</span><span class="dh-title">POLÍTICA ECONÓMICA — elige 1</span><span class="dh-sel" id="sel-eco">✓</span><span class="dh-arrow">▼</span></div><div class="cards-wrap" id="cards-eco"></div></div>
+  <div class="section-title"><span>🏥</span> SALUD Y PROTECCIÓN SOCIAL</div>
+  <div class="decision-group" id="grp-welfare"><div class="decision-header" onclick="toggleGroup('welfare')"><span class="dh-icon">❤️</span><span class="dh-title">POLÍTICA SOCIAL — elige 1</span><span class="dh-sel" id="sel-welfare">✓</span><span class="dh-arrow">▼</span></div><div class="cards-wrap" id="cards-welfare"></div></div>
+  <div class="section-title"><span>🛡️</span> SEGURIDAD Y DEFENSA</div>
+  <div class="decision-group" id="grp-security"><div class="decision-header" onclick="toggleGroup('security')"><span class="dh-icon">🔫</span><span class="dh-title">POLÍTICA DE SEGURIDAD — elige 1</span><span class="dh-sel" id="sel-security">✓</span><span class="dh-arrow">▼</span></div><div class="cards-wrap" id="cards-security"></div></div>
+  <div class="section-title"><span>📚</span> EDUCACIÓN Y CULTURA</div>
+  <div class="decision-group" id="grp-education"><div class="decision-header" onclick="toggleGroup('education')"><span class="dh-icon">🎓</span><span class="dh-title">POLÍTICA EDUCATIVA — elige 1</span><span class="dh-sel" id="sel-education">✓</span><span class="dh-arrow">▼</span></div><div class="cards-wrap" id="cards-education"></div></div>
+  <div class="section-title"><span>🌍</span> RELACIONES EXTERIORES Y COMERCIO</div>
+  <div class="decision-group" id="grp-trade"><div class="decision-header" onclick="toggleGroup('trade')"><span class="dh-icon">🌐</span><span class="dh-title">POLÍTICA EXTERIOR — elige 1</span><span class="dh-sel" id="sel-trade">✓</span><span class="dh-arrow">▼</span></div><div class="cards-wrap" id="cards-trade"></div></div>
+  <button id="next-btn" onclick="advanceYear()" disabled>SIGUIENTE AÑO →</button>
+</div>
+
+<!-- FINAL SCREEN -->
+<div id="final-screen" class="overlay-screen" style="display:none;">
+  <div class="overlay-card">
+    <div class="fin-emoji" id="fin-emoji">🏛️</div><h2>FIN DE MANDATO</h2>
+    <div class="govt-badge" id="govt-badge">—</div><div class="fin-text" id="fin-text">—</div>
+    <div class="fin-reflection" id="fin-reflection">—</div>
+    <div id="final-stats">
+      <div class="fs-item"><div class="fs-val" id="fs-money">—</div><div class="fs-lbl">Dinero</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-corruption">—</div><div class="fs-lbl">Corrupción</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-health">—</div><div class="fs-lbl">Salud</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-homicide">—</div><div class="fs-lbl">Homicidios</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-unemployment">—</div><div class="fs-lbl">Desempleo</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-hdi">—</div><div class="fs-lbl">IDH</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-foreign">—</div><div class="fs-lbl">Rel. Exteriores</div></div>
+      <div class="fs-item"><div class="fs-val" id="fs-stability">—</div><div class="fs-lbl">Estabilidad</div></div>
+    </div>
+    <div id="fin-recap"></div>
+    <div class="source-links" id="source-links"></div>
+    <button class="diff-btn" onclick="restartGame()" style="margin-top:16px;">🔄 JUGAR DE NUEVO</button>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   REPÚBLICA TRICOLOR v3.0 — Corrección histórica y 6 opciones
+   Ideologías: R=Derecha(Abelardo), CD=CentroDerecha(Paloma),
+   C=Centro(Fajardo), L=Izquierda(Cepeda), H=Histórico
+   Cada categoría: 1R + 1CD + 1C + 1L + 2H = 6 opciones
+   Sin repeticiones: pool se filtra por usedIds global
+================================================================= */
+let difficulty = 'normal';
+let state = {};
+let selections = {};
+let chosenHistory = { eco: [], welfare: [], security: [], education: [], trade: [] };
+let usedDecisionIds = []; // IDs usados en toda la partida
+let openGroups = { eco: true, welfare: false, security: false, education: false, trade: false };
+let lowSatisfactionYears = 0;
+let securityDecisionsCount = 0;
+let securityDecisionsLog = [];
+let debtCrisisTriggered = false;
+
+function shuffle(arr) { let a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// ─── DECISIONES CORREGIDAS (6 por categoría: R, CD, C, L, H, H) ───
+// Fuentes: Planes de gobierno reales 2026 y hechos históricos verificados
+const DECISIONS = {
+  eco: [
+    // DERECHA - Abelardo de la Espriella
+    { id:'eR1', ideo:'R', name:'Ajuste Fiscal: Reducir el Gasto Público 25%', who:'Abelardo de la Espriella (Derecha)', desc:'Recorte de $70 billones eliminando ministerios y entidades duplicadas.', theory:'Von Mises: el intervencionismo estatal destruye bienestar porque el Estado carece del mecanismo de precios.<cite>"El Estado no crea riqueza; solo puede redistribuir lo que ha tomado primero." — Ludwig von Mises, Liberalismo (1927)</cite>', fx: s=>{ s.money+=40; s.corruption-=8; s.unemployment-=5; s.hdi+=5; s.stability+=5; } },
+    // CENTRO-DERECHA - Paloma Valencia
+    { id:'eCD1', ideo:'CD', name:'Zonas Francas y Exenciones para Regiones Rezagadas', who:'Paloma Valencia (Centro-Derecha)', desc:'Incentivos tributarios por 15 años en Pacífico, Arauca y Catatumbo para atraer inversión.', theory:'Acemoglu: las instituciones extractivas regionales perpetúan el subdesarrollo. Las zonas francas crean precedentes de inclusión.<cite>"Las naciones fracasan por instituciones que no crean incentivos." — Acemoglu & Robinson (2012)</cite>', fx: s=>{ s.money+=25; s.unemployment-=6; s.hdi+=8; s.foreign+=5; } },
+    // CENTRO - Sergio Fajardo
+    { id:'eC1', ideo:'C', name:'Economía del Conocimiento: Inversión en CTI', who:'Sergio Fajardo (Centro)', desc:'Duplicar inversión en ciencia, tecnología e innovación al 1% del PIB con alianzas universidad-empresa.', theory:'Acemoglu documenta que la innovación endógena es el motor del desarrollo inclusivo. Sin inversión en CTI, el país queda atrapado en la trampa del ingreso medio.<cite>"La diferencia entre países ricos y pobres está en si sus instituciones educan para innovar." — Acemoglu & Robinson</cite>', fx: s=>{ s.hdi+=12; s.unemployment-=8; s.money-=20; s.foreign+=5; s.stability+=5; } },
+    // IZQUIERDA - Iván Cepeda
+    { id:'eL1', ideo:'L', name:'Reforma Tributaria Progresiva: Gravar Grandes Fortunas', who:'Iván Cepeda (Izquierda)', desc:'Impuesto del 2% a patrimonios superiores a $5.000 millones para financiar inversión social.', theory:'Acemoglu advierte que la concentración extrema crea élites extractivas, pero Mises señala que impuestos al capital reducen la inversión futura.<cite>"El camino hacia la servidumbre está pavimentado de buenas intenciones." — F.A. Hayek, Camino de Servidumbre (1944)</cite>', fx: s=>{ s.money+=20; s.corruption+=10; s.health+=8; s.hdi+=6; s.foreign-=5; } },
+    // HISTÓRICO 1
+    { id:'eH1', ideo:'H', name:'Apertura Económica de Gaviria (1990-1994)', who:'César Gaviria (Histórico)', desc:'Reducción masiva de aranceles del 44% al 12% e integración a mercados globales.', theory:'La apertura fue la aplicación más radical del pensamiento de libre mercado en Colombia. Forzó modernización del aparato productivo.<cite>"La prosperidad de los vecinos es una ventaja, no una amenaza." — Ludwig von Mises, Nación, Estado y Economía (1919)</cite>', fx: s=>{ s.money+=30; s.unemployment-=10; s.hdi+=10; s.foreign+=10; s.stability+=5; } },
+    // HISTÓRICO 2
+    { id:'eH2', ideo:'H', name:'Misión Kemmerer: Creación del Banco de la República (1923)', who:'Pedro Nel Ospina (Histórico)', desc:'Fundación del banco central independiente, Contraloría y Superintendencia Bancaria.', theory:'Tanto Hayek como Mises reconocen que la independencia monetaria es crítica. Sin banco central, Colombia sufría inflación crónica.<cite>"El dinero sólido protege las libertades civiles contra las incursiones despóticas del gobierno." — Ludwig von Mises, Teoría del Dinero (1912)</cite>', fx: s=>{ s.stability+=15; s.money+=10; s.corruption-=8; s.foreign+=5; } },
+  ],
+  welfare: [
+    // DERECHA - Abelardo
+    { id:'wR1', ideo:'R', name:'Vouchers de Salud: El Paciente Elige su Clínica', who:'Abelardo de la Espriella (Derecha)', desc:'Bono de salud directo al ciudadano para que escoja libremente su prestador entre EPS, clínicas privadas y públicas.', theory:'Mises: el monopolio estatal en salud elimina la retroalimentación del mercado. Un mal hospital público no cierra, condenando a los pacientes.<cite>"Hay miles de formas de satisfacer necesidades de salud. Un plan único destruye adaptabilidad." — F.A. Hayek</cite>', fx: s=>{ s.health+=10; s.hdi+=8; s.money-=15; s.corruption-=5; s.stability+=3; } },
+    // CENTRO-DERECHA - Paloma
+    { id:'wCD1', ideo:'CD', name:'Ruta 3E: Estudiar, Emplearse o Emprender', who:'Paloma Valencia (Centro-Derecha)', desc:'Bonos de formación, bilingüismo desde preescolar y capacitación en inteligencia artificial para jóvenes.', theory:'Acemoglu: el capital humano es el motor de las instituciones inclusivas. Sin educación pertinente, el bono demográfico se desperdicia.<cite>"La diferencia entre países ricos y pobres está en si educan para innovar." — Acemoglu & Robinson</cite>', fx: s=>{ s.hdi+=15; s.health+=8; s.money-=25; s.unemployment-=8; s.stability+=5; } },
+    // CENTRO - Fajardo
+    { id:'wC1', ideo:'C', name:'Sistema Nacional de Cuidado: Licencias Parentales', who:'Sergio Fajardo (Centro)', desc:'Licencia parental de 6 meses compartida, centros de cuidado infantil públicos gratuitos y reconocimiento del trabajo doméstico.', theory:'Acemoglu documenta que la exclusión laboral de la mujer es una institución extractiva que desperdicia el talento de la mitad de la población.<cite>"Desperdiciar el talento de la mitad de la población por falta de instituciones inclusivas es elegir ser pobres." — Acemoglu & Robinson</cite>', fx: s=>{ s.hdi+=10; s.health+=8; s.unemployment-=5; s.money-=20; s.stability+=8; } },
+    // IZQUIERDA - Cepeda
+    { id:'wL1', ideo:'L', name:'Salud Preventiva Universal sin Barreras', who:'Iván Cepeda (Izquierda)', desc:'Eliminar cuotas moderadoras y cuotas de recuperación. Atención primaria gratuita garantizada en todo el territorio.', theory:'Acemoglu considera que la salud preventiva universal es una inversión institucional inclusiva. Sin embargo, Mises advertiría que eliminar todo copago destruye la señal de precios y genera sobreutilización.<cite>"Donde el precio no refleja el costo real, la demanda supera la oferta y el sistema colapsa." — Ludwig von Mises, La Acción Humana (1949)</cite>', fx: s=>{ s.health+=15; s.hdi+=10; s.money-=45; s.corruption+=10; s.stability+=5; } },
+    // HISTÓRICO 1
+    { id:'wH1', ideo:'H', name:'Familias en Acción: Transferencias Condicionadas (2002)', who:'Álvaro Uribe (Histórico)', desc:'Subsidio mensual a familias pobres condicionado a que los niños asistan al colegio y reciban controles de salud.', theory:'Acemoglu considera esta política eficaz: las transferencias condicionadas invierten en capital humano en lugar de crear dependencia pura. Es el modelo de política social compatible con instituciones inclusivas.<cite>"Las transferencias condicionadas no reemplazan el mercado, invierten en la capacidad para participar en él." — Análisis Institucional del Capital Humano</cite>', fx: s=>{ s.health+=10; s.hdi+=10; s.money-=12; s.corruption+=5; s.stability+=5; } },
+    // HISTÓRICO 2
+    { id:'wH2', ideo:'H', name:'Creación del SENA por Rojas Pinilla (1957)', who:'Gustavo Rojas Pinilla (Histórico)', desc:'Fundación del Servicio Nacional de Aprendizaje para capacitar gratuitamente a la clase trabajadora colombiana.', theory:'CORRECCIÓN: El SENA fue creado por Rojas Pinilla mediante Decreto 118 de 1957, no por la Junta Militar. Capacitación técnica ligada al sector productivo.<cite>"El SENA aumentó la productividad laboral histórica de Colombia y creó una clase obrera calificada." — Análisis histórico del SENA</cite>', fx: s=>{ s.hdi+=12; s.unemployment-=8; s.money-=5; s.stability+=8; s.health+=3; } },
+  ],
+  security: [
+    // DERECHA - Abelardo
+    { id:'sR1', ideo:'R', name:'Mano Dura: Fumigación Aérea y Extradición Total', who:'Abelardo de la Espriella (Derecha)', desc:'Fumigación con glifosato, extradición de capos del narcotráfico a EE.UU. sin restricciones y fin a cualquier diálogo con grupos armados.', theory:'Acemoglu: el monopolio legítimo de la fuerza es la condición fundamental de toda institución inclusiva. Sin este, la violencia se vuelve el peor impuesto.<cite>"El Estado que no puede garantizar la vida y propiedad en todo su territorio es una ficción." — Acemoglu & Robinson (2012)</cite>', fx: s=>{ s.homicide-=15; s.corruption+=8; s.foreign+=10; s.money-=15; s.stability+=5; }, tags:['security','hardline'] },
+    // CENTRO-DERECHA - Paloma
+    { id:'sCD1', ideo:'CD', name:'Paz con Condicionamientos y Verificación Internacional', who:'Paloma Valencia (Centro-Derecha)', desc:'Mantener diálogos con grupos armados pero exigiendo entrega total de armas, verificación de la ONU y sin concesiones políticas.', theory:'Acemoglu señala que los procesos de paz duraderos requieren transformación institucional real, no impunidad. La verificación internacional reduce el riesgo de incumplimiento.<cite>"La paz no es ausencia de conflicto; es presencia de justicia. Sin justicia garantizada, es solo la postergación de la guerra." — Platón, La República</cite>', fx: s=>{ s.homicide-=10; s.stability+=12; s.money-=15; s.health+=5; s.corruption-=5; }, tags:['security','negotiation'] },
+    // CENTRO - Fajardo
+    { id:'sC1', ideo:'C', name:'Seguridad Ciudadana con Enfoque Territorial', who:'Sergio Fajardo (Centro)', desc:'Fortalecer la Policía Judicial, inteligencia contra el crimen organizado, centros de conciliación barrial y prevención del delito juvenil.', theory:'Acemoglu: la seguridad ciudadana efectiva requiere combinar fuerza legítima del Estado con prevención social. Sin oportunidades, la represión sola fracasa.<cite>"El Estado debe ser lo suficientemente fuerte para proteger a sus ciudadanos, pero lo suficientemente amarrado a las leyes para no oprimirlos." — Acemoglu, El Pasillo Estrecho (2019)</cite>', fx: s=>{ s.homicide-=8; s.stability+=10; s.hdi+=5; s.money-=12; s.corruption-=5; }, tags:['security'] },
+    // IZQUIERDA - Cepeda
+    { id:'sL1', ideo:'L', name:'Sustitución Integral de Cultivos con Inversión Rural', who:'Iván Cepeda (Izquierda)', desc:'Inversión masiva en vías terciarias, distritos de riego, créditos agrícolas y sustitución voluntaria de cultivos ilícitos con garantías de comercialización.', theory:'Acemoglu: la falta de infraestructura rural convierte a los campesinos en presa fácil de economías extractivas ilegales. Sin embargo, Mises advertiría que los subsidios difícilmente compiten con los precios del mercado negro.<cite>"Ningún decreto moral o pago subsidiado puede vencer permanentemente la fuerza de los precios formados en la escasez del mercado negro." — Análisis desde Ludwig von Mises</cite>', fx: s=>{ s.health+=5; s.money-=25; s.homicide-=5; s.corruption+=10; s.hdi+=8; s.stability+=3; } },
+    // HISTÓRICO 1
+    { id:'sH1', ideo:'H', name:'Acuerdo de Paz de La Habana con las FARC (2016)', who:'Juan Manuel Santos (Histórico)', desc:'Desmovilización de 13.000 combatientes, reforma rural integral y participación política para excombatientes.', theory:'Acemoglu lo vería como un intento valiente de convertir zonas extractivas en inclusivas. Sin embargo, Platón advertiría que la impunidad pactada debilita el respeto por la ley.<cite>"La paz sin justicia plena es la victoria del más fuerte, o del más violento, disfrazada de reconciliación democrática." — Platón, La República</cite>', fx: s=>{ s.homicide-=20; s.money-=25; s.corruption+=15; s.health+=5; s.stability+=15; }, tags:['security','negotiation'] },
+    // HISTÓRICO 2
+    { id:'sH2', ideo:'H', name:'Extradición de Capos por Vía Administrativa (1989)', who:'Virgilio Barco (Histórico)', desc:'Tras el asesinato de Luis Carlos Galán, el presidente Barco reactivó la extradición de narcotraficantes a EE.UU. por decreto ejecutivo.', theory:'Acemoglu: cuando el Estado de Derecho es acorralado por la violencia criminal, la respuesta ejecutiva de emergencia es el único mecanismo de supervivencia institucional.<cite>"Cuando la ley es tomada como rehén por los criminales, la fuerza del gobernante justo es la única defensa de la ciudad." — Platón, adaptado a la defensa del Estado de Derecho</cite>', fx: s=>{ s.homicide-=15; s.stability+=10; s.corruption-=10; s.foreign+=5; s.money-=5; }, tags:['security','hardline'] },
+  ],
+  education: [
+    // DERECHA - Abelardo
+    { id:'edR1', ideo:'R', name:'Vouchers Educativos: Libertad de Elección Escolar', who:'Abelardo de la Espriella (Derecha)', desc:'Bono escolar directo a las familias para que elijan la institución educativa pública o privada que prefieran.', theory:'Mises: el monopolio educativo estatal elimina la competencia. Las escuelas que no satisfacen a los padres no cierran, perpetuando la mediocridad.<cite>"Hay miles de formas de educar. Reemplazar todas por un plan único destruye la adaptabilidad." — F.A. Hayek</cite>', fx: s=>{ s.hdi+=10; s.health+=5; s.money-=12; s.unemployment-=4; s.corruption-=5; } },
+    // CENTRO-DERECHA - Paloma
+    { id:'edCD1', ideo:'CD', name:'Bilingüismo Universal desde Preescolar', who:'Paloma Valencia (Centro-Derecha)', desc:'Inglés intensivo obligatorio desde los 4 años en todos los colegios públicos, con docentes nativos digitales.', theory:'Acemoglu: el capital humano es el motor fundamental de las instituciones inclusivas. El bilingüismo abre mercados globales a las nuevas generaciones.<cite>"Sin capital humano calificado, un país queda excluido del comercio global de alto valor agregado." — Análisis económico del capital humano</cite>', fx: s=>{ s.hdi+=14; s.foreign+=8; s.money-=20; s.unemployment-=5; s.stability+=3; } },
+    // CENTRO - Fajardo
+    { id:'edC1', ideo:'C', name:'Formación en Pensamiento Crítico y Competencias Digitales', who:'Sergio Fajardo (Centro)', desc:'Integrar programación, robótica y ética digital en el currículo escolar, formando ciudadanos críticos para la era de la desinformación.', theory:'Hayek: la educación es el campo donde la intervención estatal se justifica por externalidades sociales incalculables. La democracia requiere ciudadanos que sepan discernir información.<cite>"Sin pensamiento crítico, la democracia se convierte en un mercado de demagogos." — Adaptado de Platón, La República</cite>', fx: s=>{ s.hdi+=16; s.unemployment-=8; s.money-=22; s.foreign+=5; s.stability+=8; } },
+    // IZQUIERDA - Cepeda
+    { id:'edL1', ideo:'L', name:'Universidad Pública Gratuita Universal', who:'Iván Cepeda (Izquierda)', desc:'Gratuidad total en matrícula de pregrado en universidades públicas, más subsidio de sostenimiento para estudiantes de bajos recursos.', theory:'Von Mises advertía que la gratuidad total elimina los incentivos de eficiencia académica. Sin embargo, Acemoglu reconoce que la educación superior es motor de movilidad social.<cite>"Educar a todos sin distinguir al apto del inepto no es democracia, es la destrucción del conocimiento." — Platón, La República</cite>', fx: s=>{ s.hdi+=18; s.health+=8; s.money-=50; s.corruption+=15; s.unemployment+=3; } },
+    // HISTÓRICO 1
+    { id:'edH1', ideo:'H', name:'Creación del ICETEX por Lleras Camargo (1950)', who:'Alberto Lleras Camargo (Histórico)', desc:'Fundación del Instituto Colombiano de Crédito Educativo para financiar estudios superiores de jóvenes de escasos recursos.', theory:'El ICETEX democratizó el acceso a la educación superior en Colombia durante décadas, aunque luego enfrentó críticas por las altas tasas de interés.<cite>"La educación superior no puede ser privilegio de quienes nacen en cuna de oro." — Alberto Lleras Camargo</cite>', fx: s=>{ s.hdi+=12; s.unemployment-=6; s.money-=8; s.stability+=5; s.health+=3; } },
+    // HISTÓRICO 2
+    { id:'edH2', ideo:'H', name:'Constitución del 91: Educación como Derecho Fundamental', who:'Asamblea Constituyente (Histórico)', desc:'Consagrar la educación como derecho fundamental y deber del Estado, aumentando su financiación progresivamente.', theory:'Acemoglu: las constituciones inclusivas que garantizan derechos fundamentales crean las bases institucionales para el desarrollo de largo plazo.<cite>"Las instituciones inclusivas requieren un marco constitucional que garantice derechos iguales para todos los ciudadanos." — Acemoglu & Robinson</cite>', fx: s=>{ s.hdi+=15; s.stability+=10; s.health+=5; s.money-=15; s.corruption-=5; } },
+  ],
+  trade: [
+    // DERECHA - Abelardo
+    { id:'tR1', ideo:'R', name:'TLC Ampliado con EE.UU. y Adhesión a la OCDE', who:'Abelardo de la Espriella (Derecha)', desc:'Profundizar el libre comercio con Estados Unidos y acelerar los estándares exigidos por la OCDE para atraer inversión extranjera.', theory:'Acemoglu: el efecto de "importación institucional" obliga a hacer reformas. Von Mises aplaudiría la apertura como vía de paz y prosperidad.<cite>"La única paz duradera entre naciones es el libre comercio. Quienes comercian no tienen razón para guerrear." — Ludwig von Mises</cite>', fx: s=>{ s.money+=25; s.foreign+=15; s.stability+=10; s.hdi+=5; } },
+    // CENTRO-DERECHA - Paloma
+    { id:'tCD1', ideo:'CD', name:'Transición Energética Gradual: Gas Natural como Puente', who:'Paloma Valencia (Centro-Derecha)', desc:'Mantener el gas natural como combustible de transición mientras se construye infraestructura solar y eólica sin sacrificar la seguridad energética.', theory:'Hayek: una transición forzada destruye capital sin garantizar el sustituto. La gradualidad permite que el mercado descubra cuándo las alternativas son viables.<cite>"La economía de mercado puede adaptarse gradualmente a nuevas circunstancias sin destruir lo que ya funciona." — F.A. Hayek</cite>', fx: s=>{ s.money+=15; s.foreign+=8; s.health+=5; s.stability+=8; s.hdi+=3; } },
+    // CENTRO - Fajardo
+    { id:'tC1', ideo:'C', name:'Diversificación Comercial: Alianza del Pacífico y Asia', who:'Sergio Fajardo (Centro)', desc:'Reducir la dependencia de Estados Unidos con 5 nuevos acuerdos comerciales en Asia y fortalecer la Alianza del Pacífico.', theory:'Acemoglu: la dependencia excesiva de un solo socio comercial crea vulnerabilidad y élites extractivas vinculadas a ese mercado. Diversificar democratiza las fuerzas económicas.<cite>"El comercio internacional diversificado es el mejor antídoto contra élites monopolísticas y presiones externas." — Ludwig von Mises, Omnipotencia del Gobierno (1944)</cite>', fx: s=>{ s.money+=25; s.foreign+=12; s.hdi+=8; s.stability+=5; s.unemployment-=3; } },
+    // IZQUIERDA - Cepeda
+    { id:'tL1', ideo:'L', name:'Soberanía Alimentaria y Protección al Campesino', who:'Iván Cepeda (Izquierda)', desc:'Aranceles a productos agrícolas subsidiados del primer mundo y subsidios a la producción campesina nacional para garantizar autosuficiencia alimentaria.', theory:'Acemoglu documenta que las reglas asimétricas del comercio global pueden ser instituciones extractivas impuestas. Sin embargo, Mises recalca que el arancel lo paga el consumidor local.<cite>"Cuando un lado subsidia masivamente su agricultura, no hay mercado libre, sino dominación disfrazada de comercio." — Análisis Institucional del Comercio Global</cite>', fx: s=>{ s.hdi+=5; s.money-=15; s.stability-=5; s.foreign-=12; s.health+=8; s.unemployment+=5; } },
+    // HISTÓRICO 1
+    { id:'tH1', ideo:'H', name:'Firma del TLC Colombia-EE.UU. (2006-2011)', who:'Álvaro Uribe / Juan Manuel Santos (Histórico)', desc:'Tratado de Libre Comercio que disparó exportaciones no mineras pero también expuso al agro colombiano a competencia desleal.', theory:'Mises aplaudiría la apertura incondicional, mientras Hayek señalaría las desigualdades a corto plazo. Acemoglu considera los TLC espadas de doble filo.<cite>"El libre comercio crea riqueza agregada, pero sin instituciones de ajuste equitativas, puede exacerbar la desigualdad." — Acemoglu & Robinson</cite>', fx: s=>{ s.money+=30; s.foreign+=15; s.unemployment+=5; s.hdi+=8; s.stability+=5; } },
+    // HISTÓRICO 2
+    { id:'tH2', ideo:'H', name:'Apertura Diplomática con Venezuela de López Michelsen (1974)', who:'Alfonso López Michelsen (Histórico)', desc:'Restablecimiento de relaciones diplomáticas y comerciales con Venezuela tras años de tensiones fronterizas.', theory:'Von Mises apoyaría el comercio bilateral, pero advertiría del contagio institucional. Acemoglu señala que el comercio entre países con instituciones dispares exporta tanto mercancías como vicios sistémicos.<cite>"Dime con quién comercias y te diré qué instituciones terminarás importando." — Adaptado de Acemoglu & Robinson</cite>', fx: s=>{ s.money+=15; s.stability+=8; s.foreign+=10; s.homicide-=3; s.corruption+=5; } },
+  ]
+};
+
+const EVENTS_NORMAL = [
+  { icon:'📢', text:'Paro camionero nacional. Cadenas de suministro bloqueadas.', fx: s=>{ s.money-=12; s.hdi-=3; s.stability-=5; } },
+  { icon:'🕵️', text:'Megaescándalo de corrupción en contratos estatales.', fx: s=>{ s.corruption+=18; s.hdi-=5; s.stability-=8; } },
+  { icon:'💊', text:'Crisis de las EPS: colapso de servicios en 4 regiones.', fx: s=>{ s.health-=15; s.hdi-=5; s.stability-=4; } },
+  { icon:'📉', text:'Caída global del precio del petróleo. Ingresos se desploman.', fx: s=>{ s.money-=40; s.unemployment+=8; s.stability-=3; } },
+  { icon:'🌾', text:'Cosecha récord de café. Exportaciones históricas.', fx: s=>{ s.money+=28; s.unemployment-=5; s.hdi+=3; } },
+  { icon:'🎓', text:'Colombia sube 20 puestos en ranking PISA.', fx: s=>{ s.hdi+=8; s.health+=5; s.foreign+=5; } },
+  { icon:'🤝', text:'Acuerdo humanitario en zona de conflicto.', fx: s=>{ s.stability+=12; s.homicide-=5; s.hdi+=5; } },
+  { icon:'💰', text:'Bonanza de remesas desde EE.UU. y España.', fx: s=>{ s.money+=22; s.hdi+=4; s.health+=3; } },
+  { icon:'🚢', text:'Incautación récord: 50 toneladas de cocaína.', fx: s=>{ s.stability+=8; s.corruption-=5; s.homicide-=3; } },
+  { icon:'✈️', text:'Récord de turismo internacional. Colombia de moda.', fx: s=>{ s.money+=25; s.foreign+=5; s.stability+=5; } },
+];
+
+const EVENTS_CONDITIONAL = [
+  { id:'cond_farc', icon:'⚔️', text:'⚠️ REACTIVACIÓN ARMADA: Sin políticas de seguridad, el ELN se expande.', detail:'Sin decisiones de seguridad, grupos armados controlan nuevas zonas.', check:(st,log)=>log.securityDecisionsCount===0, prob:0.75, probBase:0.05, fx:s=>{s.homicide+=15;s.money-=10;s.health-=5;s.hdi-=8;s.stability-=10;s.foreign-=5;}, avoidedBy:'Cualquier decisión de seguridad', avoidedText:'✅ Tus políticas de seguridad mantuvieron contenidos a los grupos armados.' },
+  { id:'cond_coca', icon:'🌿', text:'⚠️ EXPANSIÓN DEL NARCOTRÁFICO: Sin mano dura, cultivos ilícitos se duplican.', detail:'Sin fumigación ni extradición, los carteles expanden operaciones.', check:(st,log)=>!log.hasHardlineSecurity, prob:0.60, probBase:0.06, fx:s=>{s.homicide+=20;s.corruption+=15;s.money-=10;s.stability-=8;s.foreign-=5;}, avoidedBy:'Políticas de mano dura (Fumigación, Extradición)', avoidedText:'✅ Tus políticas de mano dura frenaron la expansión de cultivos ilícitos.' },
+  { id:'cond_migration', icon:'🛶', text:'⚠️ OLA MIGRATORIA: Alto IDH atrae migrantes que tensionan servicios.', detail:'IDH≥70 atrae migrantes presionando salud, empleo y finanzas.', check:(st,log)=>st.hdi>=70, prob:0.85, probBase:0.10, fx:s=>{s.health-=8;s.unemployment+=6;s.money-=12;s.stability-=4;}, avoidedBy:'Control Migratorio Estricto (tR2)', avoidedText:'✅ El control migratorio gestionó ordenadamente el flujo.' },
+  { id:'cond_protests', icon:'🔥', text:'⚠️ ESTALLIDO SOCIAL: IDH bajo acumulado provoca protestas masivas.', detail:'Dos años con IDH<35 generan malestar que estalla en las calles.', check:(st,log)=>log.lowSatisfactionYears>=2, prob:0.50, probBase:0.05, fx:s=>{s.hdi-=10;s.money-=20;s.homicide+=12;s.stability-=15;s.corruption+=10;}, avoidedBy:'Mantener IDH>35 consistentemente', avoidedText:'✅ El IDH se mantuvo en niveles aceptables.' },
+  { id:'cond_fmi', icon:'🏦', text:'⚠️ INTERVENCIÓN DEL FMI: Dinero en negativo fuerza rescate.', detail:'Con arcas en rojo, el FMI impone ajustes draconianos.', check:(st,log)=>st.money<0, prob:0.90, probBase:0.05, fx:s=>{s.money+=30;s.unemployment+=8;s.hdi-=5;s.foreign-=5;s.stability-=5;}, avoidedBy:'Mantener Dinero del Estado>0', avoidedText:'✅ Las finanzas positivas evitaron la intervención del FMI.' },
+  { id:'cond_venezuela', icon:'🛢️', text:'⚠️ CRISIS DIPLOMÁTICA CON VENEZUELA: Relaciones exteriores bajas.', detail:'Relaciones<30 llevan a crisis que impacta comercio y seguridad.', check:(st,log)=>st.foreign<30, prob:0.55, probBase:0.06, fx:s=>{s.money-=15;s.foreign-=10;s.unemployment+=5;s.homicide+=5;s.stability-=5;}, avoidedBy:'Mantener Relaciones Exteriores>30', avoidedText:'✅ La diplomacia activa preservó relaciones estables.' },
+  { id:'cond_unemployment_crime', icon:'🔪', text:'⚠️ DELINCUENCIA POR DESEMPLEO: Desempleo máximo dispara criminalidad.', detail:'Desempleo≥85 empuja a miles a la economía ilegal.', check:(st,log)=>st.unemployment>=85, prob:0.80, probBase:0.08, fx:s=>{s.homicide+=15;s.stability-=12;s.money-=10;s.hdi-=8;s.corruption+=10;}, avoidedBy:'Mantener Desempleo<85', avoidedText:'✅ El desempleo se mantuvo en niveles manejables.' },
+  { id:'cond_homicide_hdi', icon:'💀', text:'⚠️ VIOLENCIA DESBORDADA: Homicidios máximos desploman el IDH.', detail:'Homicidios≥85 destruyen tejido social, escuelas y hospitales.', check:(st,log)=>st.homicide>=85, prob:0.85, probBase:0.10, fx:s=>{s.hdi-=20;s.health-=15;s.stability-=18;s.money-=25;s.foreign-=10;s.unemployment+=10;}, avoidedBy:'Mantener Homicidios<85', avoidedText:'✅ Los homicidios no alcanzaron niveles catastróficos.' },
+];
+
+function toggleHelp() { const p=document.getElementById('help-panel'); p.style.display=p.style.display==='none'?'block':'none'; }
+
+function startGame(diff) {
+  difficulty = diff;
+  document.getElementById('diff-screen').style.display = 'none';
+  document.getElementById('game').style.display = 'flex';
+  state = { year:1, money:400, corruption:55, health:62, homicide:48, unemployment:58, hdi:60, foreign:50, stability:65 };
+  selections = { eco:null, welfare:null, security:null, education:null, trade:null };
+  chosenHistory = { eco:[], welfare:[], security:[], education:[], trade:[] };
+  usedDecisionIds = [];
+  openGroups = { eco:true, welfare:false, security:false, education:false, trade:false };
+  lowSatisfactionYears = 0; securityDecisionsCount = 0; securityDecisionsLog = []; debtCrisisTriggered = false;
+  document.getElementById('debt-warning').classList.remove('show');
+  renderStats(null); updateYear();
+  document.getElementById('event-box').innerHTML = `<div class="ev-item"><div class="ev-header"><span>🇨🇴</span><span>Inicia tu mandato. 5 años, 5 decisiones por año. Construye el futuro de Colombia.</span></div></div>`;
+  buildCards();
+}
+
+function getBalancedCards(group) {
+  // Filtrar del pool: solo decisiones NO usadas en toda la partida
+  let pool = DECISIONS[group].filter(d => !usedDecisionIds.includes(d.id));
+  
+  // Si no hay suficientes, liberar el historial de esta categoría y reintentar
+  if (pool.length < 6) {
+    // Remover del usedDecisionIds las decisiones de este grupo que estén en chosenHistory
+    chosenHistory[group].forEach(id => {
+      const idx = usedDecisionIds.indexOf(id);
+      if (idx > -1) usedDecisionIds.splice(idx, 1);
+    });
+    chosenHistory[group] = [];
+    pool = DECISIONS[group].filter(d => !usedDecisionIds.includes(d.id));
+  }
+  
+  // Si aún así no hay suficientes (no debería pasar), usar todas las disponibles
+  if (pool.length < 6) {
+    pool = [...DECISIONS[group]];
+  }
+  
+  // Seleccionar 1 de cada ideología + 2 históricas
+  const R = shuffle(pool.filter(d => d.ideo === 'R')).slice(0, 1);
+  const CD = shuffle(pool.filter(d => d.ideo === 'CD')).slice(0, 1);
+  const C = shuffle(pool.filter(d => d.ideo === 'C')).slice(0, 1);
+  const L = shuffle(pool.filter(d => d.ideo === 'L')).slice(0, 1);
+  const H = shuffle(pool.filter(d => d.ideo === 'H')).slice(0, 2);
+  
+  return shuffle([...R, ...CD, ...C, ...L, ...H]);
+}
+
+function buildCards() {
+  ['eco','welfare','security','education','trade'].forEach(group=>{
+    const wrap=document.getElementById('cards-'+group); wrap.innerHTML='';
+    const cards = getBalancedCards(group);
+    cards.forEach(d=>{
+      const ac2map = {R:'var(--tag-r)', CD:'var(--tag-cd)', C:'var(--tag-c)', L:'var(--tag-l)', H:'var(--tag-h)'};
+      const tagLabel = {R:'Derecha', CD:'Centro-Derecha', C:'Centro', L:'Izquierda', H:'Histórico'};
+      const card=document.createElement('div'); card.className='choice-card';
+      card.style.setProperty('--ac2', ac2map[d.ideo]);
+      card.setAttribute('data-group',group); card.setAttribute('data-id',d.id);
+      card.onclick=()=>{ selectCard(group,d.id,card); };
+      card.innerHTML = `<span class="card-tag tag-${d.ideo}">${tagLabel[d.ideo]}</span><span class="card-name">${d.name}</span><span class="card-who">📌 ${d.who}</span><span class="card-desc">${d.desc}</span><div class="deep-look-toggle" onclick="event.stopPropagation();toggleDeepLook(this)">📖 Mirada más profunda ▾</div><div class="deep-look-content">${d.theory}</div><div class="card-effects">${buildEffects(d.fx)}</div>`;
+      wrap.appendChild(card);
+    });
+    applyDisplayState(group);
+  });
+}
+
+function toggleDeepLook(el) { const content=el.nextElementSibling; content.style.display=content.style.display==='block'?'none':'block'; el.textContent=content.style.display==='block'?'📖 Cerrar ▴':'📖 Mirada más profunda ▾'; }
+
+function buildEffects(fx) {
+  const dummy={money:0,corruption:0,health:0,homicide:0,unemployment:0,hdi:0,foreign:0,stability:0};
+  const proxy=new Proxy(dummy,{set(t,p,v){t[p]=v;return true;}}); fx(proxy);
+  const labels={money:'💰Dinero',corruption:'🕊️Corrupción',health:'🏥Salud',homicide:'🔫Homicidios',unemployment:'📉Desempleo',hdi:'📈IDH',foreign:'🌐Exterior',stability:'⚖️Estabilidad'};
+  return Object.entries(dummy).map(([k,v])=>{ if(v===0) return ''; const cls=(k==='corruption'||k==='homicide'||k==='unemployment')?(v<0?'pos':'neg'):(v>0?'pos':'neg'); return `<span class="eff ${cls}">${labels[k]} ${v>0?'+':''}${v}</span>`; }).join('');
+}
+
+function toggleGroup(group) { openGroups[group]=!openGroups[group]; applyDisplayState(group); }
+function applyDisplayState(group) { const wrap=document.getElementById('cards-'+group); wrap.style.display=openGroups[group]?'grid':'none'; const hdr=document.querySelector(`#grp-${group} .decision-header`); if(hdr) hdr.classList.toggle('open',openGroups[group]); }
+
+const groupOrder = ['eco','welfare','security','education','trade'];
+const groupLabels = { eco:'ECONOMÍA Y FISCAL', welfare:'SALUD Y PROTECCIÓN SOCIAL', security:'SEGURIDAD Y DEFENSA', education:'EDUCACIÓN Y CULTURA', trade:'RELACIONES EXTERIORES Y COMERCIO' };
+
+function selectCard(group,id,card) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected'); selections[group]=id;
+  document.getElementById('sel-'+group).classList.add('show');
+  openGroups[group]=false; applyDisplayState(group);
+  const idx = groupOrder.indexOf(group);
+  if (idx < groupOrder.length - 1) {
+    const nextGroup = groupOrder[idx + 1];
+    openGroups[nextGroup] = true;
+    applyDisplayState(nextGroup);
+  }
+  const allSelected = groupOrder.every(g => selections[g]);
+  if (allSelected) document.getElementById('next-btn').disabled = false;
+}
+
+function checkNegativeMoney() {
+  if (state.money < 0 && !debtCrisisTriggered) {
+    debtCrisisTriggered = true;
+    document.getElementById('debt-warning').classList.add('show');
+    state.money += 250;
+    state.corruption = Math.min(100, Math.round(state.corruption * 1.4));
+    state.health = Math.max(0, Math.round(state.health * 0.6));
+    state.homicide = Math.min(100, Math.round(state.homicide * 1.4));
+    state.unemployment = Math.min(100, Math.round(state.unemployment * 1.4));
+    state.hdi = Math.max(0, Math.round(state.hdi * 0.6));
+    state.foreign = Math.max(0, Math.round(state.foreign * 0.6));
+    state.stability = Math.max(0, Math.round(state.stability * 0.6));
+    setTimeout(() => {
+      const box = document.getElementById('event-box');
+      const div = document.createElement('div');
+      div.className = 'ev-item ev-critical';
+      div.innerHTML = `<div class="ev-header"><span>🚨</span><span>¡CRISIS FISCAL! Bancarrota del Estado. Préstamo de emergencia del FMI por $250M. Indicadores sociales caen 40%.</span></div>`;
+      box.appendChild(div);
+    }, 100);
+  }
+}
+
+function checkExtremeIndicators() {
+  if (state.unemployment >= 90) {
+    state.homicide = Math.min(100, state.homicide + 10);
+    state.stability = Math.max(0, state.stability - 8);
+    state.money -= 5;
+    setTimeout(() => {
+      const box = document.getElementById('event-box');
+      const div = document.createElement('div');
+      div.className = 'ev-item ev-critical';
+      div.innerHTML = `<div class="ev-header"><span>🔪</span><span>¡DESEMPLEO CRÍTICO! Con desempleo≥90%, la delincuencia se dispara en todas las ciudades.</span></div>`;
+      box.appendChild(div);
+    }, 150);
+  }
+  if (state.homicide >= 90) {
+    state.hdi = Math.max(0, state.hdi - 12);
+    state.health = Math.max(0, state.health - 8);
+    state.stability = Math.max(0, state.stability - 10);
+    state.money -= 10;
+    setTimeout(() => {
+      const box = document.getElementById('event-box');
+      const div = document.createElement('div');
+      div.className = 'ev-item ev-critical';
+      div.innerHTML = `<div class="ev-header"><span>💀</span><span>¡VIOLENCIA DESBORDADA! Homicidios≥90% destruyen el tejido social. IDH y esperanza de vida se desploman.</span></div>`;
+      box.appendChild(div);
+    }, 150);
+  }
+}
+
+function advanceYear() {
+  const allSelected = groupOrder.every(g => selections[g]);
+  if (!allSelected) return;
+  const prev=JSON.parse(JSON.stringify(state));
+  
+  groupOrder.forEach(group=>{
+    const id=selections[group];
+    usedDecisionIds.push(id); // Marcar como usada globalmente
+    chosenHistory[group].push(id);
+    const dec=DECISIONS[group].find(d=>d.id===id);
+    if (!dec) return;
+    const moneyBefore=state.money; dec.fx(state);
+    if(dec.ideo==='L'){ 
+      const diff=state.money-moneyBefore; 
+      if(diff<0){ 
+        const mult=difficulty==='normal'?0.2:difficulty==='dificil'?0.5:0; 
+        state.money-=Math.abs(diff)*mult; 
+      } 
+    }
+    if(group === 'security') {
+      securityDecisionsCount++;
+      securityDecisionsLog.push({
+        year: state.year, id: id, name: dec.name,
+        tags: dec.tags || [],
+        hasHardline: (dec.tags || []).includes('hardline'),
+        hasNegotiation: (dec.tags || []).includes('negotiation')
+      });
+    }
+  });
+  
+  checkNegativeMoney();
+  checkExtremeIndicators();
+  checkNegativeMoney();
+  
+  if(state.homicide>70){ state.hdi-=10; state.money-=20; state.stability-=8; }
+  if(state.hdi<35) lowSatisfactionYears++; else lowSatisfactionYears=0;
+  if(state.stability<30){ state.hdi-=8; state.money-=15; state.homicide+=10; }
+  
+  checkNegativeMoney();
+  
+  const eventLog = {
+    securityDecisionsCount: securityDecisionsCount,
+    hasHardlineSecurity: securityDecisionsLog.some(entry => entry.hasHardline),
+    hasNegotiationSecurity: securityDecisionsLog.some(entry => entry.hasNegotiation),
+    lowSatisfactionYears: lowSatisfactionYears,
+    securityDecisionsLog: securityDecisionsLog
+  };
+  
+  triggerEvents(eventLog);
+  
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  state.money=clamp(state.money,-9999,9999);
+  ['corruption','health','homicide','unemployment','hdi','foreign','stability'].forEach(k=>state[k]=clamp(state[k],0,100));
+  renderStats(prev); state.year++; updateYear();
+  selections={eco:null,welfare:null,security:null,education:null,trade:null};
+  openGroups={eco:true,welfare:false,security:false,education:false,trade:false};
+  groupOrder.forEach(g=>document.getElementById('sel-'+g).classList.remove('show'));
+  document.getElementById('next-btn').disabled=true;
+  if(state.year>5){ setTimeout(showFinal,800); } else { buildCards(); }
+}
+
+function triggerEvents(eventLog) {
+  const box=document.getElementById('event-box'); box.innerHTML='';
+  const eventCount=difficulty==='facil'?2:difficulty==='normal'?3:4;
+  const triggeredEvents = [], avoidedEvents = [];
+  EVENTS_CONDITIONAL.forEach(ev => {
+    const conditionMet = ev.check(state, eventLog);
+    const prob = conditionMet ? ev.prob : ev.probBase;
+    if (conditionMet && Math.random() < prob) triggeredEvents.push(ev);
+    else if (conditionMet && Math.random() >= prob) avoidedEvents.push(ev);
+  });
+  let normalCount = eventCount - triggeredEvents.length;
+  if (normalCount < 0) normalCount = 0;
+  const normalEvents = shuffle([...EVENTS_NORMAL]).slice(0, normalCount);
+  triggeredEvents.forEach(ev => { ev.fx(state); const div=document.createElement('div'); div.className='ev-item ev-conditional'; div.innerHTML=`<div class="ev-header"><span>${ev.icon}</span><span>${ev.text}</span></div><div class="ev-detail">📋 ${ev.detail}</div>`; box.appendChild(div); });
+  avoidedEvents.forEach(ev => { const div=document.createElement('div'); div.className='ev-item ev-avoided'; div.innerHTML=`<div class="ev-header"><span>✅</span><span>EVENTO EVITADO: ${ev.avoidedBy}</span></div><div class="ev-detail">${ev.avoidedText}</div><div class="ev-detail" style="color:#c62828;margin-top:4px;">⚠️ De no haberse evitado: ${ev.text.replace('⚠️ ','')}</div>`; box.appendChild(div); });
+  normalEvents.forEach(ev => { ev.fx(state); const div=document.createElement('div'); div.className='ev-item'; div.innerHTML=`<div class="ev-header"><span>${ev.icon}</span><span>${ev.text}</span></div>`; box.appendChild(div); });
+  box.style.animation='none'; void box.offsetWidth; box.style.animation='fadeUp .4s ease';
+}
+
+function renderStats(prev) {
+  const fields=[
+    {key:'money',id:'money',max:1200},{key:'corruption',id:'corruption',max:100},{key:'health',id:'health',max:100},{key:'homicide',id:'homicide',max:100},
+    {key:'unemployment',id:'unemployment',max:100},{key:'hdi',id:'hdi',max:100},{key:'foreign',id:'foreign',max:100},{key:'stability',id:'stability',max:100}
+  ];
+  fields.forEach(f=>{
+    const v=Math.round(state[f.key]); const valEl=document.getElementById('val-'+f.id); valEl.textContent=v;
+    if(f.key==='money'&&v<0) valEl.classList.add('negative'); else valEl.classList.remove('negative');
+    const pct=Math.min(100,Math.max(0,(Math.abs(v)/f.max)*100));
+    document.getElementById('bar-'+f.id).style.width=pct+'%';
+    if(prev){ const d=Math.round(state[f.key]-prev[f.key]); if(d!==0){ const el=document.getElementById('delta-'+f.id); el.textContent=(d>0?'+':'')+d; el.style.color=(f.key==='corruption'||f.key==='homicide'||f.key==='unemployment')?(d<0?'#2e7d32':'#c62828'):(d>0?'#2e7d32':'#c62828'); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2800); } }
+  });
+}
+
+function updateYear() { document.getElementById('year-banner').textContent=`AÑO ${Math.min(state.year,5)} DE 5`; document.getElementById('progress-fill').style.width=((Math.min(state.year,5)-1)/4*100)+'%'; }
+
+function showFinal() {
+  const s=state; let emoji,badge,color,text,reflection;
+  const moneyOk=s.money>=150, moneyCritical=s.money<0, hdiHigh=s.hdi>=70, hdiLow=s.hdi<35;
+  const homicideLow=s.homicide<40, homicideHigh=s.homicide>70, stabilityOk=s.stability>=50, stabilityCritical=s.stability<25;
+  const corruptionLow=s.corruption<40, foreignOk=s.foreign>=50, unemploymentLow=s.unemployment<40;
+  
+  if(stabilityCritical||homicideHigh){emoji='💣';badge='COLAPSO INSTITUCIONAL';color='#c62828';text='Colombia perdió el monopolio de la fuerza. Tu mandato será estudiado como caso clásico de colapso.';reflection=`Acemoglu: los países no colapsan de un día para otro, sino por acumulación de decisiones extractivas.<cite>"La tiranía surge naturalmente de la democracia corrompida." — Platón</cite>`;}
+  else if(moneyCritical&&debtCrisisTriggered){emoji='💸';badge='CRISIS DE DEUDA SOBERANA';color='#c62828';text='El Estado quebró. El FMI impuso un ajuste estructural devastador.';reflection=`Von Mises: gastar lo que no existe rompe el mecanismo de precios.<cite>"El crédito expansivo no crea riqueza real." — Mises</cite>`;}
+  else if(hdiHigh&&moneyOk&&homicideLow&&stabilityOk){emoji='🏆';badge='GOBIERNO EXCEPCIONAL';color='#2e7d32';text='Desarrollo humano, finanzas sólidas, seguridad y estabilidad. Colombia es modelo regional.';reflection=`Acemoglu: las naciones prosperan con instituciones inclusivas.<cite>"El gobernante justo sabe que la ciudad pertenece a sus ciudadanos." — Platón</cite>`;}
+  else if(hdiHigh&&!moneyOk&&homicideLow){emoji='🎉';badge='POPULAR PERO ENDEUDADO';color='#e67e22';text='El pueblo aplaudió tu gestión social pero dejaste una deuda histórica.';reflection=`Von Mises: el Estado paternalista quema capital acumulado.<cite>"El demagogo promete lo que el pueblo quiere oír." — Platón</cite>`;}
+  else if(moneyOk&&!hdiHigh&&homicideLow&&stabilityOk){emoji='📊';badge='ORDENADO PERO IMPOPULAR';color='#003893';text='Finanzas impecables pero el pueblo nunca sintió los beneficios.';reflection=`Hayek: existe diferencia entre eficiencia técnica y sociedad armónica.<cite>"La ciudad que solo persigue riqueza pierde lealtad cívica." — Platón</cite>`;}
+  else if(corruptionLow&&homicideLow&&foreignOk){emoji='🛡️';badge='ESTADO DE DERECHO FORTALECIDO';color='#2e7d32';text='Combatiste corrupción, redujiste violencia y ganaste confianza internacional.';reflection=`Acemoglu: el motor del desarrollo es la calidad institucional.<cite>"Donde la ley es señora de los gobernantes, allí veo la salvación." — Platón</cite>`;}
+  else if(hdiHigh&&homicideLow&&unemploymentLow){emoji='🌟';badge='TRANSFORMACIÓN SOCIAL';color='#2e7d32';text='IDH de país desarrollado, pleno empleo y paz. Lograste lo imposible.';reflection=`Platón soñó con una República de ciudadanos realizados.<cite>"La educación no es un costo, es la mejor inversión." — Acemoglu</cite>`;}
+  else if(hdiLow&&homicideHigh&&!stabilityOk){emoji='🔻';badge='FRACASO MULTIDIMENSIONAL';color='#c62828';text='IDH africano, violencia desbordada e instituciones colapsadas.';reflection=`Acemoglu: el círculo vicioso atrapa países por generaciones.<cite>"La decadencia rara vez es producto de un solo error." — Hayek</cite>`;}
+  else if(moneyOk&&hdiHigh&&foreignOk&&stabilityOk){emoji='🌎';badge='LIDERAZGO REGIONAL';color='#003893';text='Colombia se convirtió en faro de estabilidad en América Latina.';reflection=`Hayek: las naciones abiertas al mundo prosperan.<cite>"El comercio es el mejor antídoto contra la guerra." — Mises</cite>`;}
+  else if(unemploymentLow&&moneyOk&&stabilityOk){emoji='💼';badge='MILAGRO ECONÓMICO';color='#2e7d32';text='Desempleo mínimo, empresas florecientes, informalidad reducida.';reflection=`Von Mises: el empleo surge cuando el Estado deja de interferir.<cite>"Quien grava el trabajo produce desempleo." — Mises</cite>`;}
+  else if(foreignOk&&homicideLow&&stabilityOk&&corruptionLow){emoji='🤝';badge='PAÍS CONFIABLE';color='#003893';text='Inversión fluyendo, tratados multiplicados, foros internacionales abiertos.';reflection=`Acemoglu: la confianza internacional es el activo más valioso.<cite>"La reputación de justicia es el bien más preciado." — Platón</cite>`;}
+  else{emoji='⚖️';badge='RESULTADOS MIXTOS';color='#e67e22';text='Luces y sombras. Colombia termina más o menos como empezó.';reflection=`Hayek: gobernar es equilibrar fuerzas sin pretender controlarlas todas.<cite>"El término medio no es virtud cuando el país clama por cambios."</cite>`;}
+
+  document.getElementById('fin-emoji').textContent=emoji;
+  const gb=document.getElementById('govt-badge'); gb.textContent=badge; gb.style.background=color+'20'; gb.style.color=color; gb.style.border=`2px solid ${color}`;
+  document.getElementById('fin-text').textContent=text;
+  document.getElementById('fin-reflection').innerHTML=reflection;
+  ['money','corruption','health','homicide','unemployment','hdi','foreign','stability'].forEach(k=>{ document.getElementById('fs-'+k).textContent=Math.round(s[k]); });
+  buildRecap();
+  document.getElementById('source-links').innerHTML=`<strong>📋 Planes de gobierno 2026:</strong><br><a href='https://abelardodelaespriella.com/programa-de-gobierno/' target='_blank'>Abelardo de la Espriella (Derecha)</a> · <a href='https://palomavalencia.com/propuestas/' target='_blank'>Paloma Valencia (Centro-Derecha)</a> · <a href='https://sergiofajardo.com/programa/' target='_blank'>Sergio Fajardo (Centro)</a> · <a href='https://ivancepeda.com/propuestas/' target='_blank'>Iván Cepeda (Izquierda)</a>`;
+  document.getElementById('final-screen').style.display='flex';
+}
+
+function buildRecap() {
+  let recapHtml = `<h3 style="color:var(--blue);margin-top:20px;font-family:'Bebas Neue';font-size:1.8rem;border-bottom:3px solid var(--gold);padding-bottom:8px;margin-bottom:15px;">📋 RECAPITULACIÓN DEL MANDATO</h3>`;
+  for (let i=0; i<5; i++) {
+    if (!chosenHistory.eco[i]) break;
+    recapHtml += `<div class="recap-year"><h4>⚖️ AÑO ${i+1}</h4>`;
+    groupOrder.forEach(group => {
+      const decId = chosenHistory[group][i];
+      if (!decId) return;
+      const dec = DECISIONS[group].find(d => d.id === decId);
+      if (!dec) return;
+      const tagLabel = {R:'Derecha', CD:'Centro-Derecha', C:'Centro', L:'Izquierda', H:'Histórico'};
+      recapHtml += `<div class="recap-decision"><strong>[${groupLabels[group]}] <span style="color:var(--tag-${dec.ideo.toLowerCase()})">${tagLabel[dec.ideo]}:</span> ${dec.name}</strong><span style="font-size:.75rem;color:var(--gold-dim);">📌 ${dec.who}</span><div style="font-size:.8rem;color:var(--muted);margin-top:4px;">${dec.desc}</div><div class="recap-theory">${dec.theory}</div></div>`;
+    });
+    recapHtml += `</div>`;
+  }
+  document.getElementById('fin-recap').innerHTML = recapHtml;
+}
+
+function restartGame() { 
+  document.getElementById('final-screen').style.display='none'; 
+  document.getElementById('game').style.display='none'; 
+  document.getElementById('next-btn').disabled=true; 
+  document.getElementById('diff-screen').style.display='flex'; 
+  document.getElementById('year-banner').textContent='AÑO 1 DE 5'; 
+  document.getElementById('progress-fill').style.width='0%'; 
+  document.getElementById('debt-warning').classList.remove('show');
+}
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
